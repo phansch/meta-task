@@ -1,0 +1,15 @@
+[package]
+name = "meta-task"
+version = "0.1.0"
+authors = ["Philipp Hansch <dev@phansch.net>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = "2"
+dirs = "2"
+toml = "0.5"
+serde = { version = "1.0", features = ["derive"] }
+tmux_interface = "0.0.5"
+dialoguer = "0.5.0"
