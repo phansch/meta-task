@@ -1,6 +1,7 @@
 # meta-task
 
-`meta-task` allows you to enforce using one tmux session and one git branch per task.
+`meta-task` is meant to make it easier to work with many different projects that
+each have many different branches.
 
 ## Future Ideas
 
