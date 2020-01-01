@@ -1,5 +1,6 @@
 // TODO: Maybe assume a clean master branch checkout for now
 
+use tmux_interface::TmuxInterface;
 use dialoguer::Confirmation;
 
 mod cli;
@@ -69,10 +70,11 @@ fn main() {
         }
     }
     if let Some(_) = matches.subcommand_matches("list") {
+        let tmux = TmuxInterface::new();
+        println!("{}", tmux.list_sessions(None).unwrap());
         for t in db.list_tasks() {
             println!("{}", t);
         }
     }
     db.save();
 }
-

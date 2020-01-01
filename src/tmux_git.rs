@@ -1,8 +1,7 @@
 use std::fmt;
 use std::process::Command;
 
-use tmux_interface::{AttachSession, NewSession, SwitchClient};
-use tmux_interface::TmuxInterface;
+use tmux_interface::{TmuxInterface, AttachSession, NewSession, SwitchClient};
 
 use std::env::VarError;
 use std::env;
@@ -19,6 +18,7 @@ impl<'a> fmt::Display for TaskError<'a> {
     }
 }
 
+#[allow(dead_code)]
 fn attach_session(task_name: &str) -> Result<(), TaskError> {
     println!("AttachSession");
     let tmux = TmuxInterface::new();
@@ -50,33 +50,24 @@ fn attach_session(task_name: &str) -> Result<(), TaskError> {
 }
 
 pub fn focus_tmux_session_and_branch(task_name: &str) -> Result<(), TaskError> {
+    if in_tmux_session() {
+        switch_to_session(task_name)?;
+    } else {
+        cant_attach_outside_tmux_error();
+        // return attach_session(task_name);
+    }
+    Ok(())
+}
+
+fn switch_to_session(task_name: &str) -> Result<(), TaskError> {
     let tmux = TmuxInterface::new();
 
-    match env::var("TMUX") {
-        Err(VarError::NotPresent) => {
-            // If we're not connected to a tmux session, we have to attach first.
-            // (We can't switch to it)
-
-            return attach_session(task_name);
-        },
-        Err(VarError::NotUnicode(_)) => {
-            eprintln!("Bailing, TMUX env var contains non-Unicode characters");
-            std::process::exit(1);
-        },
-        Ok(val) => {
-            if val.is_empty() {
-                return attach_session(task_name);
-            } else {
-                println!("SwitchClient");
-                let switch = SwitchClient {
-                    target_session: Some(task_name),
-                    ..Default::default()
-                };
-                if let Err(e) = tmux.switch_client(&switch) {
-                    return Err(TaskError { status: e.err_type, message: e.err_text, source: "tmux" });
-                }
-            }
-        }
+    let switch = SwitchClient {
+        target_session: Some(task_name),
+        ..Default::default()
+    };
+    if let Err(e) = tmux.switch_client(&switch) {
+        return Err(TaskError { status: e.err_type, message: e.err_text, source: "tmux" });
     }
     Ok(())
 }
@@ -93,6 +84,14 @@ pub fn create_tmux_session_and_branch(task_name: &str) -> Result<(), TaskError> 
         return Err(TaskError { status: e.err_type, message: e.err_text, source: "tmux" });
     }
 
+    if in_tmux_session() {
+        switch_to_session(task_name)?;
+    } else {
+        cant_attach_outside_tmux_error();
+        // return attach_session(task_name);
+    }
+
+    // TODO: Handle already existing branch, do nothing
     let output = Command::new("git")
         .arg("checkout")
         .arg("-b")
@@ -112,7 +111,8 @@ pub fn create_tmux_session_and_branch(task_name: &str) -> Result<(), TaskError> 
 pub fn delete_tmux_session_and_branch(task_name: &str) -> Result<(), TaskError> {
     let tmux = TmuxInterface::new();
 
-    match tmux.kill_session(Some(true), Some(false), Some(task_name)) {
+
+    match tmux.kill_session(Some(false), Some(false), Some(task_name)) {
         Ok(output) => {
             println!("{}", &output.status.code().unwrap());
             Ok(())
@@ -127,4 +127,33 @@ pub fn delete_tmux_session_and_branch(task_name: &str) -> Result<(), TaskError> 
     // 2. Detach from tmux session
     // 3. checkout master
     // 4. remove the branch
+}
+
+/// Returns true if executed inside a tmux session
+pub fn in_tmux_session() -> bool {
+    match env::var("TMUX") {
+        Err(VarError::NotPresent) => {
+            // If we're not connected to a tmux session, we have to attach first.
+            // (We can't switch to it)
+
+            return false
+        },
+        Err(VarError::NotUnicode(_)) => {
+            eprintln!("Bailing, TMUX env var contains non-Unicode characters");
+            std::process::exit(1);
+        },
+        Ok(val) => {
+            if val.is_empty() {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+}
+
+// FIXME: Can't attach to sessions from outside tmux
+fn cant_attach_outside_tmux_error() {
+    eprintln!("Error: Currently has to be executed _inside_ a tmux session");
+    std::process::exit(1);
 }
