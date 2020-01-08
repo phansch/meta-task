@@ -70,7 +70,7 @@ fn main() {
         }
     }
     if let Some(_) = matches.subcommand_matches("list") {
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
         println!("{}", tmux.list_sessions(None).unwrap());
         for t in db.list_tasks() {
             println!("{}", t);

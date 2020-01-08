@@ -243,7 +243,7 @@ dependencies = [
  "dialoguer 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "dirs 2.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
- "tmux_interface 0.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tmux_interface 0.0.6 (git+https://github.com/AntonGepting/tmux-interface-rs.git?branch=dev)",
  "toml 0.5.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -466,8 +466,8 @@ dependencies = [
 
 [[package]]
 name = "tmux_interface"
-version = "0.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+version = "0.0.6"
+source = "git+https://github.com/AntonGepting/tmux-interface-rs.git?branch=dev#4e8c030d042ca31d511af443f64a5d21ac71a82a"
 
 [[package]]
 name = "toml"
@@ -572,7 +572,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum tempfile 3.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7a6e24d9338a0a5be79593e2fa15a648add6138caa803e2d5bc782c371732ca9"
 "checksum termios 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "72b620c5ea021d75a735c943269bb07d30c9b77d6ac6b236bc8b5c496ef05625"
 "checksum textwrap 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d326610f408c7a4eb6f51c37c330e496b08506c9457c9d34287ecc38809fb060"
-"checksum tmux_interface 0.0.5 (registry+https://github.com/rust-lang/crates.io-index)" = "a61a3d7044681ea6fc7275c8166dd795aa5bd61a73bc475676a63c07e389309b"
+"checksum tmux_interface 0.0.6 (git+https://github.com/AntonGepting/tmux-interface-rs.git?branch=dev)" = "<none>"
 "checksum toml 0.5.5 (registry+https://github.com/rust-lang/crates.io-index)" = "01d1404644c8b12b16bfcffa4322403a91a451584daaaa7c28d3152e6cbc98cf"
 "checksum unicode-width 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)" = "caaa9d531767d1ff2150b9332433f32a24622147e5ebb1f26409d5da67afd479"
 "checksum unicode-xid 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "826e7639553986605ec5979c7dd957c7895e93eabed50ab2ffa7f6128a75097c"

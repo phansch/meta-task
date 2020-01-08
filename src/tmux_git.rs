@@ -21,7 +21,7 @@ impl<'a> fmt::Display for TaskError<'a> {
 #[allow(dead_code)]
 fn attach_session(task_name: &str) -> Result<(), TaskError> {
     println!("AttachSession");
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
 
     let attach = AttachSession {
         target_session: Some(task_name),
@@ -30,7 +30,7 @@ fn attach_session(task_name: &str) -> Result<(), TaskError> {
         not_update_env: Some(false),
         read_only: Some(false)
     };
-    match tmux.attach_session(&attach) {
+    match tmux.attach_session(Some(&attach)) {
         Ok(output) => {
             if !output.status.success() {
                 return Err(
@@ -43,7 +43,7 @@ fn attach_session(task_name: &str) -> Result<(), TaskError> {
             }
         },
         Err(e) => {
-            return Err(TaskError { status: e.err_type, message: e.err_text, source: "tmux" });
+            return Err(TaskError { status: 100, message: e.message, source: "tmux" });
         }
     }
     Ok(())
@@ -53,42 +53,40 @@ pub fn focus_tmux_session_and_branch(task_name: &str) -> Result<(), TaskError> {
     if in_tmux_session() {
         switch_to_session(task_name)?;
     } else {
-        cant_attach_outside_tmux_error();
-        // return attach_session(task_name);
+        return attach_session(task_name);
     }
     Ok(())
 }
 
 fn switch_to_session(task_name: &str) -> Result<(), TaskError> {
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
 
     let switch = SwitchClient {
         target_session: Some(task_name),
         ..Default::default()
     };
-    if let Err(e) = tmux.switch_client(&switch) {
-        return Err(TaskError { status: e.err_type, message: e.err_text, source: "tmux" });
+    if let Err(e) = tmux.switch_client(Some(&switch)) {
+        return Err(TaskError { status: 100, message: e.message, source: "tmux" });
     }
     Ok(())
 }
 
 pub fn create_tmux_session_and_branch(task_name: &str) -> Result<(), TaskError> {
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
 
     let new_session = NewSession {
         session_name: Some(task_name),
         detached: Some(true),
         ..Default::default()
     };
-    if let Err(e) = tmux.new_session(&new_session) {
-        return Err(TaskError { status: e.err_type, message: e.err_text, source: "tmux" });
+    if let Err(e) = tmux.new_session(Some(&new_session)) {
+        return Err(TaskError { status: 100, message: e.message, source: "tmux" });
     }
 
     if in_tmux_session() {
         switch_to_session(task_name)?;
     } else {
-        cant_attach_outside_tmux_error();
-        // return attach_session(task_name);
+        return attach_session(task_name);
     }
 
     // TODO: Handle already existing branch, do nothing
@@ -109,7 +107,7 @@ pub fn create_tmux_session_and_branch(task_name: &str) -> Result<(), TaskError> 
 }
 
 pub fn delete_tmux_session_and_branch(task_name: &str) -> Result<(), TaskError> {
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
 
 
     match tmux.kill_session(Some(false), Some(false), Some(task_name)) {
@@ -118,7 +116,7 @@ pub fn delete_tmux_session_and_branch(task_name: &str) -> Result<(), TaskError> 
             Ok(())
         },
         Err(e) => {
-            return Err(TaskError { status: e.err_type, message: e.err_text, source: "tmux" });
+            return Err(TaskError { status: 100, message: e.message, source: "tmux" });
         }
     }
     // TODO:
@@ -150,10 +148,4 @@ pub fn in_tmux_session() -> bool {
             }
         }
     }
-}
-
-// FIXME: Can't attach to sessions from outside tmux
-fn cant_attach_outside_tmux_error() {
-    eprintln!("Error: Currently has to be executed _inside_ a tmux session");
-    std::process::exit(1);
 }
